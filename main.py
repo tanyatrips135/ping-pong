@@ -1,5 +1,10 @@
 import pygame
 from game.game_engine import GameEngine
+import pygame
+from game.game_engine import GameEngine
+
+pygame.init()
+pygame.mixer.init()  # initialize the mixer for sounds
 
 # Initialize pygame/Start application
 pygame.init()

@@ -20,6 +20,9 @@ class Ball:
 
         if self.y <= 0 or self.y + self.height >= self.screen_height:
             self.velocity_y *= -1
+            if hasattr(self, "game_engine"):  # play wall sound
+                self.game_engine.sound_wall.play()
+            
 
 
     def check_collision(self, player, ai):
@@ -36,6 +39,8 @@ class Ball:
             else:  # moving left
                 self.x = player_rect.right
             self.velocity_x *= -1
+            if hasattr(self, "game_engine"):
+                self.game_engine.sound_paddle.play()
 
         # Check collision with AI paddle
         elif ball_rect.colliderect(ai_rect):
@@ -44,6 +49,8 @@ class Ball:
             else:  # moving right
                 self.x = ai_rect.left - self.width
             self.velocity_x *= -1
+            if hasattr(self, "game_engine"):
+                self.game_engine.sound_paddle.play()
 
 
     def reset(self):
