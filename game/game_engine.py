@@ -9,6 +9,7 @@ WHITE = (255, 255, 255)
 
 class GameEngine:
     def __init__(self, width, height):
+        self.winning_score = 5  # default
         self.width = width
         self.height = height
         self.paddle_width = 10
@@ -18,9 +19,12 @@ class GameEngine:
         self.ai = Paddle(width - 20, height // 2 - 50, self.paddle_width, self.paddle_height)
         self.ball = Ball(width // 2, height // 2, 7, 7, width, height)
 
+        self.font = pygame.font.SysFont("Arial", 30)
+        self.reset_scores()  # start with 0-0
+
+    def reset_scores(self):
         self.player_score = 0
         self.ai_score = 0
-        self.font = pygame.font.SysFont("Arial", 30)
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
@@ -57,22 +61,62 @@ class GameEngine:
 
     def check_game_over(self, screen):
         winner_text = None
-        if self.player_score >= 5:
+        if self.player_score >= self.winning_score:
             winner_text = "Player Wins!"
-        elif self.ai_score >= 5:
+        elif self.ai_score >= self.winning_score:
             winner_text = "AI Wins!"
 
         if winner_text:
-            # Fill screen with black
             screen.fill((0, 0, 0))
-            # Render message
             text_surface = self.font.render(winner_text, True, (255, 255, 255))
-            # Center text
             text_rect = text_surface.get_rect(center=(self.width//2, self.height//2))
             screen.blit(text_surface, text_rect)
             pygame.display.flip()
-            # Pause to show message
-            time.sleep(3)
-            return True  # indicate game over
+            pygame.time.delay(1500)  # show winner briefly
 
+            # Show replay menu (resets scores and ball)
+            self.show_replay_menu(screen)
+
+        # Always return False so main loop continues
         return False
+
+
+    def show_replay_menu(self, screen):
+        menu_font = pygame.font.SysFont("Arial", 28)
+        options = [
+            "Press 3 for Best of 3",
+            "Press 5 for Best of 5",
+            "Press 7 for Best of 7",
+            "Press ESC to Exit"
+        ]
+
+        while True:
+            screen.fill((0, 0, 0))
+            for i, option in enumerate(options):
+                text_surface = menu_font.render(option, True, (255, 255, 255))
+                text_rect = text_surface.get_rect(center=(self.width//2, self.height//2 - 60 + i*40))
+                screen.blit(text_surface, text_rect)
+
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.unicode == "3":
+                        self.winning_score = 3
+                    elif event.unicode == "5":
+                        self.winning_score = 5
+                    elif event.unicode == "7":
+                        self.winning_score = 7
+                    elif event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        exit()
+                    else:
+                        continue
+
+                    # Reset game for new round
+                    self.reset_scores()
+                    self.ball.reset()
+                    return  # exit menu and continue game
